@@ -36,11 +36,23 @@ class GithubEventHandler:
         user_ids = []
         for github_user, reasons in event.involved_users().items():
             if github_user not in BOTS:
-                lark_user = self._user_manager.notify_user(
-                    github_login_name=github_user, reasons=reasons, event=event
-                )
+                try:
+                    lark_user = self._user_manager.notify_user(
+                        github_login_name=github_user, reasons=reasons, event=event
+                    )
+                except RuntimeError as e:
+                    if self._debug:
+                        print("UserManager.notify_user", e)
+                    lark_user = None
                 if lark_user is not None:
                     user_ids.append(lark_user)
+
+        if len(user_ids) == 0 and event.get_sender() in BOTS:
+            if self._debug:
+                print(
+                    "Skip post_to_lark as the sender is a bot and no users are to be notified"
+                )
+            return
 
         self._lark_bot_client.post_to_lark(event, user_ids)
 
@@ -52,17 +64,18 @@ class GithubEventHandler:
             event = events.IssuesEvent(event_name, webhook_json)
         elif event_name == "issue_comment":
             event = events.IssueCommentEvent(event_name, webhook_json)
-        elif event == "pull_request":
+        elif event_name == "pull_request":
             event = events.PullRequestEvent(event_name, webhook_json)
-        # elif (
-        #     event == "pull_request_review"
-        #     and webhook_json["sender"]["login"] not in BOTS
-        # ):
-        #     github_users, notification_json = self._handle_pr_review(webhook_json)
-        # elif event == "check_run":
-        #     return  # github_users, notification_json = self._handle_check_run(webhook_json)
-        # elif event == "workflow_run":
-        #     github_users, notification_json = self._handle_workflow_run(webhook_json)
+        elif event_name == "pull_request_review":
+            event = events.PullRequestReviewEvent(event_name, webhook_json)
+        elif event_name == "pull_request_review_comment":
+            event = events.PullRequestReviewCommentEvent(event_name, webhook_json)
+        elif event_name == "workflow_run":
+            event = events.WorkflowRunEvent(event_name, webhook_json)
+        elif event_name == "check_run":
+            if self._debug:
+                print(f"Discard event {event_name}")
+            return None  # now we discard this event
         else:
             raise NotImplementedError(f"Unhandled event {event_name}")
 
@@ -74,7 +87,9 @@ class GithubEventHandler:
             return event
         if event.notification_message() is None:
             if self._debug:
-                print(f"Event {event_name} message is None. {webhook_json}")
+                raise RuntimeError(
+                    f"Event {event_name} message is None. {webhook_json}"
+                )
             return event
 
         self._post_to_lark(event=event)

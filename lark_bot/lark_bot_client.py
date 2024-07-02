@@ -41,6 +41,9 @@ class LarkBotClient:
         print(
             f"[LarkBotClient] Post event {event.event_name} {event.notification_title()} to lark"
         )
+        mentions = " ".join([f"<at id={user_id}></at>" for user_id in user_ids])
+        if len(mentions) == 0:
+            mentions = "General Notification."
         data = {
             "msg_type": "interactive",
             "card": {
@@ -51,9 +54,7 @@ class LarkBotClient:
                     "template_variable": {
                         # the "GitHub:" prefix is needed to meet the keyword requirement
                         "notification_title": f"GitHub: {event.notification_title()}",
-                        "mentions": " ".join(
-                            [f"<at id={user_id}></at>" for user_id in user_ids]
-                        ),
+                        "mentions": mentions,
                         "link_title": event.link_title(),
                         "link_url": event.link_url(),
                         "message": event.notification_message(),

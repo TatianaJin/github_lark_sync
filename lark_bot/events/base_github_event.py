@@ -28,6 +28,7 @@ class InvolveReason:
     ASSIGNEE = "assignee"  # assigned to issue/PR
     REVIEWER = "reviewer"  # reviewed or requested to review PR
     SENDER = "sender"  # github user that triggered the event
+    WORKFLOW_RUN_COMPLETE = "workflow_run_complete"
 
 
 class BaseGithubEvent:
@@ -77,7 +78,7 @@ class BaseGithubEvent:
         """
         pass
 
-    def get_sender(self) -> bool:
+    def get_sender(self) -> str:
         return self._webhook_json["sender"]["login"]
 
     @classmethod

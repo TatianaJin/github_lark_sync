@@ -16,8 +16,23 @@
 
 """ GitHub Events """
 
-__all__ = ["BaseGithubEvent", "IssuesEvent", "InvolveReason", "IssueCommentEvent"]
+__all__ = [
+    "BaseGithubEvent",
+    "IssuesEvent",
+    "InvolveReason",
+    "IssueCommentEvent",
+    "PullRequestEvent",
+    "PullRequestReviewEvent",
+    "PullRequestReviewCommentEvent",
+    "WorkflowRunEvent",
+]
 
 from lark_bot.events.issues_event import IssuesEvent
 from lark_bot.events.issue_comment_event import IssueCommentEvent
 from lark_bot.events.base_github_event import BaseGithubEvent, InvolveReason
+from lark_bot.events.pull_request_event import PullRequestEvent
+from lark_bot.events.pull_request_review_event import PullRequestReviewEvent
+from lark_bot.events.pull_request_review_comment_event import (
+    PullRequestReviewCommentEvent,
+)
+from lark_bot.events.workflow_run_event import WorkflowRunEvent

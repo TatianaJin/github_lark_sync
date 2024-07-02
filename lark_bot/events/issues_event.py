@@ -45,11 +45,6 @@ class IssuesEvent(BaseGithubEvent):
         action = self._webhook_json["action"]
         users = {}
         if action in ["opened", "reopened", "edited"]:
-            # created_by = self._webhook_json["issue"]["user"]["login"]
-            # self._add_to_involved_users(users, [created_by], InvolveReason.CREATOR)
-            # sender = self._webhook_json["sender"]["login"]
-            # self._add_to_involved_users(users, [sender], InvolveReason.SENDER)
-
             assignees = self.get_assignees(self._webhook_json["issue"])
             self._add_to_involved_users(users, assignees, InvolveReason.ASSIGNEE)
 

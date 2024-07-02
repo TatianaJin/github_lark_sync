@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Server for handling github hooks and sending notification to lark bot. """
+""" Obsolete. Server for handling github hooks and sending notification to lark bot. """
 
 import json
 import os

@@ -22,12 +22,12 @@ from typing import List
 import json
 
 
-BOTS = ["coderabbitai[bot]"]
+BOTS = ["coderabbitai[bot]", "coderabbitai"]
 
 DEFAULT_CONFIG = {
     "bot_pr_review": False,  # PR reviewed by bots
     "pr_review": True,  # PR reviewed by others
-    "pr_run": True,  # workflow run completed for PR
+    InvolveReason.WORKFLOW_RUN_COMPLETE: True,  # workflow run completed for PR
     InvolveReason.ASSIGNEE: True,  # assigned to issue
     InvolveReason.ATED_IN_ISSUE: True,  # @ed in issue body
     InvolveReason.ATED_IN_COMMENT: True,  # @ed in issue comment
@@ -70,8 +70,6 @@ class User:
                         to_notify = True
                 elif self.config["pr_review"]:
                     to_notify = True
-            elif event.event_name == "workflow_run" and self.config["pr_run"]:
-                to_notify = True
 
         if to_notify:
             return self.user_id

@@ -22,8 +22,8 @@ from lark_bot.events.base_github_event import BaseGithubEvent, InvolveReason
 from datetime import datetime
 
 
-class IssuesEvent(BaseGithubEvent):
-    """Issues: https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request"""
+class PullRequestEvent(BaseGithubEvent):
+    """Pull Request: https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request"""
 
     def __init__(self, event_name: str, webhook_json: object) -> None:
         super().__init__(event_name=event_name, webhook_json=webhook_json)
@@ -75,17 +75,21 @@ class IssuesEvent(BaseGithubEvent):
         sender = self._webhook_json["sender"]["login"]
         pull_request_json = self._webhook_json["pull_request"]
         body = pull_request_json["body"]
-        if action in ["opened", "reopened", "edited", "synchronize"]:
-            return f"{sender} {action} PR.\n {body}"
+        if action in ["opened", "edited"]:
+            return f"{sender} {action} PR.\n\n**Content**\n{body}"
+        elif action in ["synchronize", "reopened"]:
+            return f"{sender} {action} PR."
         elif action == "review_requested":
-            return f"{sender} requested review.\n {body}"
+            return f"{sender} requested review."
 
         print(f"[WARNING] Unhandled pull_request action {self._webhook_json['action']}")
         return None
 
     def should_skip_notification(self, combine_related_updates_interval: int) -> bool:
-        action = self._webhook_json["action"]
+        if len(self.involved_users()) == 0:
+            return True
 
+        action = self._webhook_json["action"]
         # events to skip notification
         if action in ["assigned", "labeled"]:
             return True
@@ -97,11 +101,11 @@ class IssuesEvent(BaseGithubEvent):
         update_time = datetime.strptime(
             self._webhook_json["pull_request"]["updated_at"], "%Y-%m-%dT%H:%M:%SZ"
         )
-        # if action in ["review_requested"]:
-        #    if (
-        #        update_time.timestamp() - create_time.timestamp()
-        #        <= combine_related_updates_interval
-        #    ):
-        #        return True
+        if action in ["review_requested"]:
+            if (
+                update_time.timestamp() - create_time.timestamp()
+                <= combine_related_updates_interval
+            ):
+                return True
 
         return False

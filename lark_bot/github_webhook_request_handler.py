@@ -61,7 +61,7 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
         try:
             self._github_event_handler.handle_event(event, webhook_json)
         except Exception:  # pylint: disable=broad-exception-caught
-            dir_name = f"{event}_{webhook_json['action']}"
+            dir_name = f"{event}-{webhook_json['action']}"
             os.makedirs(os.path.join(self._event_log_dir, dir_name), exist_ok=True)
             with open(
                 os.path.join(
