@@ -82,17 +82,21 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        try:
-            self.handle_event(event, webhook_json)
-        except Exception as e:  # pylint: disable=broad-exception-caught
+        # FIXME
+        # try:
+        #     self.handle_event(event, webhook_json)
+        # except Exception as e:  # pylint: disable=broad-exception-caught
+        if True:
+            print(self.headers)
             dir_name = f"{event}_{webhook_json['action']}"
-            os.makedirs(dir_name, exist_ok=True)
+            os.makedirs(os.path.join(EVENT_DIR, dir_name), exist_ok=True)
             with open(
                 os.path.join(EVENT_DIR, dir_name, str(time.time())),
                 "w",
                 encoding="utf-8",
             ) as event_output:
-                event_output.write(e)
+                event_output.write(f"{time.time()}")
+                # event_output.write(e)
                 event_output.write("\n")
                 event_output.write(json.dumps(webhook_json, indent=2))
 
@@ -430,7 +434,7 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
             "content": {
                 "post": {
                     "zh_cn": {
-                        "title": f"Dev Notification: {event_name}",
+                        "title": f"GitHub Dev Notification: {event_name}",
                         "content": message_contents,
                     }
                 }
