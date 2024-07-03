@@ -59,6 +59,9 @@ class User:
 
     def notify(self, reasons: List[InvolveReason], event: BaseGithubEvent):
         to_notify = False
+        if event.get_sender() in BOTS and self.config["bot_pr_review"] is not True:
+            return None
+
         for reason in reasons:
             if reason in self.config and self.config[reason]:
                 to_notify = True
