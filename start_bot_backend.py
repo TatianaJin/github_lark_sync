@@ -34,6 +34,7 @@ def get_args():
         help="File path to the lark user id list",
     )
     parser.add_argument("-p", "--port", type=int, default=9002, help="Server port")
+    parser.add_argument("-l", "--log_event", default=False, action="store_true")
     return parser.parse_args()
 
 
@@ -43,7 +44,9 @@ if __name__ == "__main__":
     event_handler = GithubEventHandler(
         main_args.user_config_file, main_args.lark_bot_url
     )
-    handler = partial(NotifyLarkRequestHandler, event_handler)
+    handler = partial(
+        NotifyLarkRequestHandler, event_handler, always_log_event=main_args.log_event
+    )
 
     print("Serve at port 9002")
     httpd = HTTPServer(server_address, handler)

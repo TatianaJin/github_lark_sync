@@ -81,6 +81,9 @@ class BaseGithubEvent:
     def get_sender(self) -> str:
         return self._webhook_json["sender"]["login"]
 
+    def get_action(self) -> str:
+        return self._webhook_json["action"]
+
     @classmethod
     def _find_users_ated(cls, text: str):
         if text is None:

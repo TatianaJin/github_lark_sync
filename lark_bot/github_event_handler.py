@@ -72,7 +72,7 @@ class GithubEventHandler:
             event = events.PullRequestReviewCommentEvent(event_name, webhook_json)
         elif event_name == "workflow_run":
             event = events.WorkflowRunEvent(event_name, webhook_json)
-        elif event_name == "check_run":
+        elif event_name in ["check_run", "pull_request_review_thread"]:
             if self._debug:
                 print(f"Discard event {event_name}")
             return None  # now we discard this event
@@ -82,7 +82,7 @@ class GithubEventHandler:
         if event.should_skip_notification(COMBINE_RELATED_UPDATES_TIME):
             if self._debug:
                 print(
-                    f"skip notification of {event.event_name}: {event.notification_title()}"
+                    f"[GithubEventHandler::handle_event] skip notification of {event.event_name}: {event.get_action()}"
                 )
             return event
         if event.notification_message() is None:

@@ -37,12 +37,28 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
         github_event_handler: GithubEventHandler,
         *args,
         event_log_dir: str = EVENT_DIR,
+        always_log_event: bool = False,
         **kwargs,
     ):
         self._github_event_handler = github_event_handler
         self._event_log_dir = event_log_dir
+        self._always_log_event = always_log_event
         if len(args) > 0:
             super().__init__(*args, **kwargs)
+
+    def _log_event(self, event_name: str, webhook_json: object, timestamp: datetime):
+        dir_name = f"{event_name}-{webhook_json['action']}"
+        os.makedirs(os.path.join(self._event_log_dir, dir_name), exist_ok=True)
+        with open(
+            os.path.join(
+                self._event_log_dir,
+                dir_name,
+                timestamp.strftime("%Y%m%d-%H%M%S.%f") + ".json",
+            ),
+            "w",
+            encoding="utf-8",
+        ) as event_output:
+            event_output.write(json.dumps(webhook_json, indent=2))
 
     def do_GET(self):  # pylint: disable=invalid-name, BaseHTTPRequestHandler interface
         self.send_response(200)
@@ -60,16 +76,7 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         try:
             self._github_event_handler.handle_event(event, webhook_json)
+            if self._always_log_event:
+                self._log_event(event, webhook_json, now)
         except Exception:  # pylint: disable=broad-exception-caught
-            dir_name = f"{event}-{webhook_json['action']}"
-            os.makedirs(os.path.join(self._event_log_dir, dir_name), exist_ok=True)
-            with open(
-                os.path.join(
-                    self._event_log_dir,
-                    dir_name,
-                    now.strftime("%Y%m%d-%H%M%S.%f") + ".json",
-                ),
-                "w",
-                encoding="utf-8",
-            ) as event_output:
-                event_output.write(json.dumps(webhook_json, indent=2))
+            self._log_event(event, webhook_json, now)

@@ -54,7 +54,8 @@ class IssuesEvent(BaseGithubEvent):
             )
         elif action == "assigned":
             assignee = self._webhook_json["assignee"]["login"]
-            self._add_to_involved_users(users, [assignee], InvolveReason.ASSIGNEE)
+            if assignee != self._webhook_json["sender"]["login"]:
+                self._add_to_involved_users(users, [assignee], InvolveReason.ASSIGNEE)
 
         self._involved_users = users
         return users

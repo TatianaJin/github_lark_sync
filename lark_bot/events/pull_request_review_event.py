@@ -38,7 +38,8 @@ class PullRequestReviewEvent(BaseGithubEvent):
 
         if action == "submitted":
             created_by = pull_request_json["user"]["login"]
-            self._add_to_involved_users(users, [created_by], InvolveReason.CREATOR)
+            if created_by != self._webhook_json["sender"]["login"]:
+                self._add_to_involved_users(users, [created_by], InvolveReason.CREATOR)
 
         self._involved_users = users
         return users
