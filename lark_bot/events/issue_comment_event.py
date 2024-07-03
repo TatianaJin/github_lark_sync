@@ -60,7 +60,7 @@ class IssueCommentEvent(BaseGithubEvent):
         action = self._webhook_json["action"]
         if action == "created":
             return "New Comment"
-        return f"Issue {action.capitalize()}"
+        return f"Issue Comment {action.capitalize()}"
 
     def link_url(self) -> str:
         return self._webhook_json["comment"]["html_url"]
