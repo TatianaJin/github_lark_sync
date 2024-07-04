@@ -16,6 +16,8 @@
 
 """Start the server that processes github webhook events and send lark notifications."""
 
+import sys
+
 from lark_bot.github_webhook_request_handler import NotifyLarkRequestHandler
 from lark_bot.github_event_handler import GithubEventHandler
 
@@ -48,6 +50,6 @@ if __name__ == "__main__":
         NotifyLarkRequestHandler, event_handler, always_log_event=main_args.log_event
     )
 
-    print("Serve at port 9002")
+    sys.stderr.write("Serve at port 9002\n")
     httpd = HTTPServer(server_address, handler)
     httpd.serve_forever()
