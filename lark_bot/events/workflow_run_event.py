@@ -35,8 +35,11 @@ class WorkflowRunEvent(BaseGithubEvent):
         users = {}
 
         sender = self._webhook_json["sender"]["login"]
+
+        conclusion = self._webhook_json["workflow_run"]["conclusion"]
+
         self._add_to_involved_users(
-            users, [sender], InvolveReason.WORKFLOW_RUN_COMPLETE
+            users, [sender], f"{InvolveReason.WORKFLOW_RUN_COMPLETE}.{conclusion}"
         )
 
         self._involved_users = users

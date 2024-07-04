@@ -27,7 +27,9 @@ BOTS = ["coderabbitai[bot]", "coderabbitai"]
 DEFAULT_CONFIG = {
     "bot_pr_review": False,  # PR reviewed by bots
     "pr_review": True,  # PR reviewed by others
-    InvolveReason.WORKFLOW_RUN_COMPLETE: True,  # workflow run completed for PR
+    InvolveReason.WORKFLOW_RUN_COMPLETE: {
+        "failure"
+    },  # workflow run completed with failure for PR
     InvolveReason.ASSIGNEE: True,  # assigned to issue
     InvolveReason.ATED_IN_ISSUE: True,  # @ed in issue body
     InvolveReason.ATED_IN_COMMENT: True,  # @ed in issue comment
@@ -63,7 +65,11 @@ class User:
             return None
 
         for reason in reasons:
-            if reason in self.config and self.config[reason]:
+            if reason in self.config and self.config[reason] is True:
+                to_notify = True
+                break
+            reason_main, detail = reason.rsplit(".", 1)
+            if reason_main in self.config and detail in self.config[reason_main]:
                 to_notify = True
                 break
         if not to_notify and InvolveReason.CREATOR in reasons:
