@@ -47,10 +47,12 @@ class GithubEventHandler:
                 if lark_user is not None:
                     user_ids.append(lark_user)
 
-        if len(user_ids) == 0 and event.get_sender() in BOTS:
+        # if len(user_ids) == 0 and event.get_sender() in BOTS:
+        if len(user_ids) == 0:
             if self._debug:
                 print(
-                    "Skip post_to_lark as the sender is a bot and no users are to be notified"
+                    # "Skip post_to_lark as the sender is a bot and no users are to be notified"
+                    "Skip post_to_lark as no users are to be notified"
                 )
             return
 

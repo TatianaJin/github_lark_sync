@@ -68,10 +68,11 @@ class User:
             if reason in self.config and self.config[reason] is True:
                 to_notify = True
                 break
-            reason_main, detail = reason.rsplit(".", 1)
-            if reason_main in self.config and detail in self.config[reason_main]:
-                to_notify = True
-                break
+            if len(reason.rsplit(".", 1)) == 2:
+                reason_main, detail = reason.rsplit(".", 1)
+                if reason_main in self.config and detail in self.config[reason_main]:
+                    to_notify = True
+                    break
         if not to_notify and InvolveReason.CREATOR in reasons:
             if event.event_name == "pull_request_review":
                 if event.get_sender() in BOTS:

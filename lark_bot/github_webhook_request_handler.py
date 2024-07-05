@@ -45,7 +45,20 @@ class GitHubHookIpManager:
     def get_github_webhook_subnets(cls):
         github_api_url = "https://api.github.com/meta"
         rsp = requests.get(github_api_url, timeout=3)
-        return json.loads(rsp.text)["hooks"]
+        try:
+            hooks = json.loads(rsp.text)["hooks"]
+        except KeyError as e:
+            sys.stderr.write(json.dumps(json.loads(rsp.text), indent=2))
+            sys.stderr.write(f"{e}\n")
+            hooks = [
+                "192.30.252.0/22",
+                "185.199.108.0/22",
+                "140.82.112.0/20",
+                "143.55.64.0/20",
+                "2a0a:a440::/29",
+                "2606:50c0::/32",
+            ]
+        return hooks
 
     def _refresh_from_github(self):
         now = datetime.now()
@@ -53,6 +66,12 @@ class GitHubHookIpManager:
             self._last_github_hook_ip_fetch is None
             or (now - self._last_github_hook_ip_fetch).days > self._refresh_interval
         ):
+            if self._last_github_hook_ip_fetch is not None:
+                print(
+                    "Refresh after",
+                    (now - self._last_github_hook_ip_fetch).days,
+                    "days",
+                )
             self._github_hook_subnets = self.get_github_webhook_subnets()
             self._last_github_hook_ip_fetch = now
             sys.stderr.write(f"Refreshed hook subnets:\n{self._github_hook_subnets}\n")
@@ -75,6 +94,7 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
     def __init__(
         self,
         github_event_handler: GithubEventHandler,
+        github_ip_manager: GitHubHookIpManager,
         *args,
         event_log_dir: str = EVENT_DIR,
         always_log_event: bool = False,
@@ -83,7 +103,7 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
         self._github_event_handler = github_event_handler
         self._event_log_dir = event_log_dir
         self._always_log_event = always_log_event
-        self._ip_manager = GitHubHookIpManager()
+        self._ip_manager = github_ip_manager
         if len(args) > 0:
             super().__init__(*args, **kwargs)
 
