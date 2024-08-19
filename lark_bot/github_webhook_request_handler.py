@@ -122,7 +122,10 @@ class NotifyLarkRequestHandler(BaseHTTPRequestHandler):
             event_output.write(json.dumps(webhook_json, indent=2))
 
     def do_GET(self):  # pylint: disable=invalid-name, BaseHTTPRequestHandler interface
-        self.send_response(403)
+        if self.path == "/health":  # allow health check
+            self.send_response(200)
+        else:
+            self.send_response(403)
         self.send_header("Content-type", "text/html")
         self.end_headers()
 

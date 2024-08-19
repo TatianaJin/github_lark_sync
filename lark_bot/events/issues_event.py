@@ -90,7 +90,7 @@ class IssuesEvent(BaseGithubEvent):
         action = self._webhook_json["action"]
 
         # events to skip notification
-        if action in ["milestoned", "labeled", "closed"]:
+        if action in ["milestoned", "labeled", "closed", "pinned"]:
             return True
 
         if action == "edited" and len(self.involved_users()) == 0:

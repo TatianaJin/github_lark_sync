@@ -44,8 +44,8 @@ def get_args():
 
 
 if __name__ == "__main__":
-    server_address = ("", 9002)
     main_args = get_args()
+    server_address = ("", main_args.port)
     event_handler = GithubEventHandler(
         main_args.user_config_file, main_args.lark_bot_url
     )
@@ -57,6 +57,6 @@ if __name__ == "__main__":
         always_log_event=main_args.log_event,
     )
 
-    sys.stderr.write("Serve at port 9002\n")
+    sys.stderr.write(f"Serve at port {main_args.port}\n")
     httpd = HTTPServer(server_address, handler)
     httpd.serve_forever()
