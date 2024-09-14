@@ -7,10 +7,13 @@ services:
       - "9002:9002"
     restart: "unless-stopped"
     command:
-      - ./start_bot_backend.py
+      - python
+      - ./bot_backend.py
       - -u
       - ./flavius_user_list
-      - https://open.larksuite.com/open-apis/bot/v2/hook/f2f5f94a-3774-4801-ac5b-6f5b5c506dd3
+      - https://open.larksuite.com/open-apis/bot/v2/hook/84447dc0-b647-419e-9c7f-c9072d4fc89f
+      # FIXME(tatiana): use real lark bot url
+      # - https://open.larksuite.com/open-apis/bot/v2/hook/f2f5f94a-3774-4801-ac5b-6f5b5c506dd3
     develop:
       watch:
         # sync code to the container for hot reload
