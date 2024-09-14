@@ -1,0 +1,4 @@
+requests
+Flask==2.3.3
+# needed by flask
+Werkzeug<3

@@ -16,7 +16,12 @@
 
 """Start the server that processes github webhook events and send lark notifications."""
 
-from lark_bot.github_webhook_request_handler import NotifyLarkRequestHandler
+import sys
+
+from lark_bot.github_webhook_request_handler import (
+    NotifyLarkRequestHandler,
+    GitHubHookIpManager,
+)
 from lark_bot.github_event_handler import GithubEventHandler
 
 from argparse import ArgumentParser
@@ -39,15 +44,19 @@ def get_args():
 
 
 if __name__ == "__main__":
-    server_address = ("", 9002)
     main_args = get_args()
+    server_address = ("", main_args.port)
     event_handler = GithubEventHandler(
         main_args.user_config_file, main_args.lark_bot_url
     )
+    ip_manager = GitHubHookIpManager()
     handler = partial(
-        NotifyLarkRequestHandler, event_handler, always_log_event=main_args.log_event
+        NotifyLarkRequestHandler,
+        event_handler,
+        ip_manager,
+        always_log_event=main_args.log_event,
     )
 
-    print("Serve at port 9002")
+    sys.stderr.write(f"Serve at port {main_args.port}\n")
     httpd = HTTPServer(server_address, handler)
     httpd.serve_forever()

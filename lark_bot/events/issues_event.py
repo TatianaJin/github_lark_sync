@@ -52,10 +52,15 @@ class IssuesEvent(BaseGithubEvent):
             self._add_to_involved_users(
                 users, ated_in_issue, InvolveReason.ATED_IN_ISSUE
             )
-        elif action == "assigned":
+        elif action in ["assigned", "unassigned"]:
             assignee = self._webhook_json["assignee"]["login"]
             if assignee != self._webhook_json["sender"]["login"]:
                 self._add_to_involved_users(users, [assignee], InvolveReason.ASSIGNEE)
+
+        # no need to notify the person who triggered this event
+        sender = self._webhook_json["sender"]["login"]
+        if sender in users:
+            users.pop(sender)
 
         self._involved_users = users
         return users
@@ -75,7 +80,7 @@ class IssuesEvent(BaseGithubEvent):
     def notification_message(self) -> str:
         action = self._webhook_json["action"]
         sender = self._webhook_json["sender"]["login"]
-        if action in ["opened", "reopened", "edited", "assigned"]:
+        if action in ["opened", "reopened", "edited", "assigned", "unassigned"]:
             return f"{sender} {action} issue."
 
         print(f"[WARNING] Unhandled issues action {self._webhook_json['action']}")
@@ -85,7 +90,13 @@ class IssuesEvent(BaseGithubEvent):
         action = self._webhook_json["action"]
 
         # events to skip notification
-        if action in ["milestoned", "labeled"]:
+        if action in ["milestoned", "labeled", "closed", "pinned"]:
+            return True
+
+        if action == "edited" and len(self.involved_users()) == 0:
+            print(
+                "[IssuesEvent] skip notification of issue edited when no user is to be notified"
+            )
             return True
 
         # events that are related to issue opened should be skipped to avoid duplicate notification

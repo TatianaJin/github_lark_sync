@@ -1,0 +1,37 @@
+# Git related
+.gitignore
+.git
+
+# Python cache files
+__pycache__
+*.py[cod]
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Test files
+test_*.py
+tests/
+
+# Docker-related files
+Dockerfile
+docker-compose.yml
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Markdown files
+*.md
+
+# Repo-specific files
+event_log
